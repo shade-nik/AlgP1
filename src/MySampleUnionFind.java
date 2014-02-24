@@ -6,13 +6,14 @@ public class MySampleUnionFind extends AbstractUnionFind
 
    public MySampleUnionFind(int n)
    {
-      matrix = new int[(n * n + 2)];
+      matrix = new int[n];
+   }
 
-      top = n * n + 1;
-      bottom = n * n + 2;
-
-      matrix[n * n + 1] = n * n + 1;
-      matrix[n * n + 2] = n * n + 2;
+   public MySampleUnionFind(int[] matrix)
+   {
+      this.matrix = matrix;
+      top = matrix[matrix.length - 2];
+      bottom = matrix[matrix.length - 1];
    }
 
    @Override
@@ -37,6 +38,15 @@ public class MySampleUnionFind extends AbstractUnionFind
       int minCCId;
 
       // choose maximal value as a value for merge
+      if (matrix[i] == 0)
+      {
+         matrix[i] = i;
+      }
+      if (matrix[j] == 0)
+      {
+         matrix[j] = j;
+      }
+
       if (matrix[i] > matrix[j])
       {
          maxCCId = matrix[i];
@@ -47,7 +57,6 @@ public class MySampleUnionFind extends AbstractUnionFind
          maxCCId = matrix[j];
          minCCId = matrix[i];
       }
-
       // change ids of merging connected components to value of maximum
       for (int k = 0; k < matrix.length; k++)
       {

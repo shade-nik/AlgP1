@@ -23,9 +23,17 @@ public class Percolation
       this.n = n; // NxN - matrix dimension
       countOpen = 0;
       neighbors2D = new int[4];
-      matrix = new int[n];
 
-      uf1D = new MySampleUnionFind(n);
+      matrix = new int[n * n + 2];
+//      for(int i = 0; i < n*n ; i ++) {
+//         matrix[i] = i;
+//      }
+      top = n * n;
+      bottom = top + 1;
+      matrix[top] = top;
+      matrix[bottom] = bottom;
+
+      uf1D = new MySampleUnionFind(matrix);
    }
 
    private double computePercolation()
@@ -57,7 +65,7 @@ public class Percolation
    private boolean isFull(int i, int j)
    {
       // Actually need union find there
-      if (uf1D.connected(i, j))
+      if (uf1D.connected(getBy2D(i, j), top))
       {
          return true;
       }
@@ -88,8 +96,14 @@ public class Percolation
       unionWithNeighbors(linearUnionId);
    }
 
-   private static boolean percolates()
+   private boolean percolates()
    {
+      // Определим что такое есть протекать, получается что это когда
+      // виртуальный топ и виртуальный bottom в одном компоненте
+      if (uf1D.connected(top, bottom))
+      {
+         return true;
+      }
       return false;
    }
 
@@ -145,8 +159,8 @@ public class Percolation
    private void calculateNeighbors(int linear, int i, int j)
    {
       /**
-       * [-] [i-1,j] [-] [i, j-1] [i,j] [i, j+1] [-] [i+1,j] [-] соединяем ноды так если мы получаем меньше нуля сверху
-       * - соединяем с виртуальным topId если больше n^2 (n*n) - соединяем с виртуальным bottomId
+       * соединяем ноды так если мы получаем меньше нуля сверху - соединяем с виртуальным topId если больше n^2 (n*n)
+       * снизу - соединяем с виртуальным bottomId
        */
       /*
        * left neighbor if (j==0) (leftmost node, no node to the left) set to 0
@@ -183,20 +197,20 @@ public class Percolation
       }
       if (i == n - 1)
       {
-         neighbors2D[2] = 0; // ?
+         neighbors2D[3] = 0; // ?
       }
       else
       {
-         neighbors2D[2] = linear + n;
+         neighbors2D[3] = linear + n;
       }
    }
 
    private void testOutMatrix()
    {
       System.out.println("Sites opened:" + countOpen);
-      for (int i : matrix)
+      for (int i = 1; i < n*n +1 ; i++ )
       {
-         System.out.print("[" + i + "]");
+         System.out.print("[" + matrix[i-1] + "]");
          if (i % n == 0)
          {
             System.out.println();
