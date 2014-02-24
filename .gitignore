@@ -1,0 +1,17 @@
+#/bin
+
+#Generated compiled files
+*.class
+target/
+build/
+bin/
+
+gnore Eclipse files
+*.classpath
+*.prefs
+*.project 
+.project
+.gitk
+.settings/
+.externalToolBuilders/
+
