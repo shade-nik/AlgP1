@@ -37,12 +37,13 @@ public class Percolation
    {
       while (!percolates())
       {
-         testOutOpenMatrix();
 
          openRandomNode();
+         testOutOpenMatrix();
+
 
       }
-      pTreshold = countOpen / (n * n);
+      pTreshold = (double) countOpen / (n * n);
       return pTreshold;
    }
 
@@ -98,10 +99,16 @@ public class Percolation
    {
       // Определим что такое есть протекать, получается что это когда
       // виртуальный топ и виртуальный bottom в одном компоненте
-      if (uf1D.connected(top, bottom))
-      {
-         return true;
+
+      for(int i = 1; i < n; i++) {
+         if(uf1D.connected(top - i , top)) {
+            return true;
+         }
       }
+//      if (uf1D.connected(top, bottom))
+//      {
+//         return true;
+//      }
       return false;
    }
 
@@ -188,7 +195,9 @@ public class Percolation
       System.out.println("Sites opened:" + countOpen);
       for (int i = 1; i < n * n + 1; i++)
       {
-         System.out.print("[" + ((openMatrix[i - 1])?"1":" ") + "]");
+         System.out.print("[" + ((openMatrix[i - 1])?"*":" ") + "]");
+         
+         
          if (i % n == 0)
          {
             System.out.println();
