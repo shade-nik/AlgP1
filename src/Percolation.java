@@ -1,10 +1,12 @@
 public class Percolation
 {
    private boolean openMatrix[];
+   private boolean perc;
+   
    private int n;
    private int top;
    private int bottom;
-   
+
    int[] neighbors2D;
 
    private int countOpen;
@@ -20,16 +22,17 @@ public class Percolation
       top = n * n;
       bottom = top + 1;
 
-      //open node count
+      // open node count
       countOpen = 0;
-      //optional neighbors array for 2d matrix 
+      // optional neighbors array for 2d matrix
       neighbors2D = new int[4];
-      //nodes state(open/closed) storage =)
+      // nodes state(open/closed) storage =)
       openMatrix = new boolean[top + 2];
-      
+
       openMatrix[top] = true;
       openMatrix[bottom] = true;
-
+      perc = false;
+      
       uf1D = new QuickUF(top + 2);
    }
 
@@ -39,14 +42,12 @@ public class Percolation
       {
 
          openRandomNode();
-         testOutOpenMatrix();
-
+//         testOutOpenMatrix();
 
       }
       pTreshold = (double) countOpen / (n * n);
       return pTreshold;
    }
-
 
    private void openRandomNode()
    {
@@ -56,6 +57,9 @@ public class Percolation
       {
          open(i, j);
          countOpen++;
+         if(isFull(i, j)) {
+            perc = true;
+         }
       }
 
    }
@@ -92,23 +96,24 @@ public class Percolation
       openMatrix[linearUnionId] = true;
       // open2Dneighbors(linearUnionId);
       calculateNeighbors(linearUnionId, i, j);
-      unionWithNeighbors(linearUnionId);
+      unionWithNeighbors(linearUnionId, i, j);
    }
 
    private boolean percolates()
    {
       // Определим что такое есть протекать, получается что это когда
       // виртуальный топ и виртуальный bottom в одном компоненте
-
-      for(int i = 1; i < n; i++) {
-         if(uf1D.connected(top - i , top)) {
+      for (int i = 1; i < n; i++)
+      {
+         if (openMatrix[top-i] && uf1D.connected(top - i, top))
+         {
             return true;
          }
       }
-//      if (uf1D.connected(top, bottom))
-//      {
-//         return true;
-//      }
+      // if (uf1D.connected(top, bottom))
+      // {
+      // return true;
+      // }
       return false;
    }
 
@@ -127,17 +132,30 @@ public class Percolation
       return i * n + j;
    }
 
-   private void unionWithNeighbors(int linear)
+   private void unionWithNeighbors(int linear, int i, int j)
    {
       // Объединения с соседями хм будем 4 раза проходить весь массив
       // left
+      if (openMatrix[neighbors2D[0]])
+      {
          uf1D.union(linear, neighbors2D[0]);
+      }
       // right
+      if (openMatrix[neighbors2D[1]])
+      {
          uf1D.union(linear, neighbors2D[1]);
+      }
       // top
+      if (openMatrix[neighbors2D[2]])
+      {
          uf1D.union(linear, neighbors2D[2]);
+      }
       // bottom
+      if (openMatrix[neighbors2D[3]])
+      {
+
          uf1D.union(linear, neighbors2D[3]);
+      }
    }
 
    private void calculateNeighbors(int linear, int i, int j)
@@ -146,9 +164,7 @@ public class Percolation
        * соединяем ноды так если мы получаем меньше нуля сверху - соединяем с виртуальным topId если больше n^2 (n*n)
        * снизу - соединяем с виртуальным bottomId
        */
-      /*
-       * left neighbor if (j==0) (leftmost node, no node to the left) set to 0
-       */
+
       if (j == 0)
       {
          neighbors2D[0] = linear;
@@ -179,7 +195,7 @@ public class Percolation
       {
          neighbors2D[2] = linear - n;
       }
-      
+
       if (i == n - 1)
       {
          neighbors2D[3] = bottom; // ?
@@ -195,14 +211,13 @@ public class Percolation
       System.out.println("Sites opened:" + countOpen);
       for (int i = 1; i < n * n + 1; i++)
       {
-         System.out.print("[" + ((openMatrix[i - 1])?"*":" ") + "]");
-         
-         
+         System.out.print("[" + ((openMatrix[i - 1]) ? "*" : " ") + "]");
+
          if (i % n == 0)
          {
             System.out.println();
          }
       }
    }
-   
+
 }
