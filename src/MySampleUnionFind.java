@@ -1,17 +1,20 @@
 public class MySampleUnionFind extends AbstractUnionFind
 {
-   protected int[] matrix;
+   protected int[] connectionMatrix;
+   protected boolean[] openMatrix;
    protected int top;
    protected int bottom;
 
    public MySampleUnionFind(int n)
    {
-      matrix = new int[n];
+      connectionMatrix = new int[n];
+      openMatrix = new boolean[n];
    }
 
-   public MySampleUnionFind(int[] matrix)
+   public MySampleUnionFind(int[] matrix, boolean[] openMatrix)
    {
-      this.matrix = matrix;
+      this.connectionMatrix = matrix;
+      this.openMatrix = openMatrix;
       top = matrix[matrix.length - 2];
       bottom = matrix[matrix.length - 1];
    }
@@ -19,7 +22,7 @@ public class MySampleUnionFind extends AbstractUnionFind
    @Override
    public boolean connected(int i, int j)
    {
-      if (matrix[i] != 0 && matrix[i] == matrix[j])
+      if (openMatrix[i] && openMatrix[j] && connectionMatrix[i] == connectionMatrix[j])
       {
          return true;
       }
@@ -38,31 +41,27 @@ public class MySampleUnionFind extends AbstractUnionFind
       int minCCId;
 
       // choose maximal value as a value for merge
-      if (matrix[i] == 0)
+      if (!openMatrix[j])
       {
-         matrix[i] = i;
-      }
-      if (matrix[j] == 0)
-      {
-         matrix[j] = j;
+         connectionMatrix[j] = j;
       }
 
-      if (matrix[i] > matrix[j])
+      if (connectionMatrix[i] > connectionMatrix[j])
       {
-         maxCCId = matrix[i];
-         minCCId = matrix[j];
+         maxCCId = connectionMatrix[i];
+         minCCId = connectionMatrix[j];
       }
       else
       {
-         maxCCId = matrix[j];
-         minCCId = matrix[i];
+         maxCCId = connectionMatrix[j];
+         minCCId = connectionMatrix[i];
       }
       // change ids of merging connected components to value of maximum
-      for (int k = 0; k < matrix.length; k++)
+      for (int k = 0; k < connectionMatrix.length; k++)
       {
-         if (matrix[k] == minCCId)
+         if (connectionMatrix[k] == minCCId)
          {
-            matrix[k] = maxCCId;
+            connectionMatrix[k] = maxCCId;
          }
       }
    }
@@ -77,7 +76,7 @@ public class MySampleUnionFind extends AbstractUnionFind
       {
          return true;
       }
-      else if ((matrix[i] == top && matrix[j] == bottom) || (matrix[i] == bottom && matrix[j] == top))
+      else if ((connectionMatrix[i] == top && connectionMatrix[j] == bottom) || (connectionMatrix[i] == bottom && connectionMatrix[j] == top))
       {
          return true;
       }

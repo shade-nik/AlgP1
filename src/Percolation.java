@@ -1,46 +1,43 @@
 public class Percolation
 {
+   private boolean openMatrix[];
    private int n;
-
-   private int matrix[];
+   private int top;
+   private int bottom;
+   
    int[] neighbors2D;
 
    private int countOpen;
 
-   private int top;
-   private int bottom;
-
    private double pTreshold;
 
-   private MySampleUnionFind uf1D;
+   private AbstractUnionFind uf1D;
 
-   /**
-    * Percolation constructor. Here we create inital (starting) matrix actually cc[][]... and two virtual node
-    * Инициализирую массив для протекания с 2 виртуальными вершинами
-    */
    public Percolation(int n)
    {
-      this.n = n; // NxN - matrix dimension
-      countOpen = 0;
-      neighbors2D = new int[4];
-
-      matrix = new int[n * n + 2];
-//      for(int i = 0; i < n*n ; i ++) {
-//         matrix[i] = i;
-//      }
+      // NxN - matrix dimension
+      this.n = n;
       top = n * n;
       bottom = top + 1;
-      matrix[top] = top;
-      matrix[bottom] = bottom;
 
-      uf1D = new MySampleUnionFind(matrix);
+      //open node count
+      countOpen = 0;
+      //optional neighbors array for 2d matrix 
+      neighbors2D = new int[4];
+      //nodes state(open/closed) storage =)
+      openMatrix = new boolean[top + 2];
+      
+      openMatrix[top] = true;
+      openMatrix[bottom] = true;
+
+      uf1D = new QuickUF(top + 2);
    }
 
    private double computePercolation()
    {
       while (!percolates())
       {
-         testOutMatrix();
+         testOutOpenMatrix();
 
          openRandomNode();
 
@@ -49,10 +46,11 @@ public class Percolation
       return pTreshold;
    }
 
+
    private void openRandomNode()
    {
-      int i = StdRandom.uniform(1, n);
-      int j = StdRandom.uniform(1, n);
+      int i = StdRandom.uniform(0, n);
+      int j = StdRandom.uniform(0, n);
       if (!isOpen(i, j))
       {
          open(i, j);
@@ -65,7 +63,7 @@ public class Percolation
    private boolean isFull(int i, int j)
    {
       // Actually need union find there
-      if (uf1D.connected(getBy2D(i, j), top))
+      if (uf1D.connected(convert2DtoLinear(i, j), top))
       {
          return true;
       }
@@ -80,7 +78,7 @@ public class Percolation
     */
    private boolean isOpen(int i, int j)
    {
-      return (getBy2D(i, j) != 0) ? true : false;
+      return openMatrix[convert2DtoLinear(i, j)];
    }
 
    /**
@@ -89,8 +87,8 @@ public class Percolation
    private void open(int i, int j)
    {
       // Вычисляем id для linear UF
-      int linearUnionId = i * n + j;
-
+      int linearUnionId = convert2DtoLinear(i, j);
+      openMatrix[linearUnionId] = true;
       // open2Dneighbors(linearUnionId);
       calculateNeighbors(linearUnionId, i, j);
       unionWithNeighbors(linearUnionId);
@@ -117,43 +115,22 @@ public class Percolation
       System.out.println("Computed treshold: " + percolationTreshold);
    }
 
-   private int getBy2D(int i, int j)
+   private int convert2DtoLinear(int i, int j)
    {
-      return matrix[i * n + j];
+      return i * n + j;
    }
 
    private void unionWithNeighbors(int linear)
    {
       // Объединения с соседями хм будем 4 раза проходить весь массив
       // left
-      if (neighbors2D[0] != 0)
-      {
          uf1D.union(linear, neighbors2D[0]);
-      }
       // right
-      if (neighbors2D[1] != 0)
-      {
          uf1D.union(linear, neighbors2D[1]);
-      }
       // top
-      if (neighbors2D[2] != 0)
-      {
          uf1D.union(linear, neighbors2D[2]);
-      }
-      else
-      {
-         uf1D.union(linear, top);
-      }
       // bottom
-      if (neighbors2D[3] != 0)
-      {
          uf1D.union(linear, neighbors2D[3]);
-      }
-      else
-      {
-         uf1D.union(linear, bottom);
-      }
-      // uf1D.unionWithMatrix(linear, neighbors2D); //TODO вытащить метод в этот класс
    }
 
    private void calculateNeighbors(int linear, int i, int j)
@@ -167,7 +144,7 @@ public class Percolation
        */
       if (j == 0)
       {
-         neighbors2D[0] = 0;
+         neighbors2D[0] = linear;
       }
       else
       {
@@ -178,7 +155,7 @@ public class Percolation
        */
       if (j == n - 1)
       {
-         neighbors2D[1] = 0;
+         neighbors2D[1] = linear;
       }
       else
       {
@@ -189,15 +166,16 @@ public class Percolation
        */
       if (i == 0)
       {
-         neighbors2D[2] = 0; // ?
+         neighbors2D[2] = top; // ?
       }
       else
       {
          neighbors2D[2] = linear - n;
       }
+      
       if (i == n - 1)
       {
-         neighbors2D[3] = 0; // ?
+         neighbors2D[3] = bottom; // ?
       }
       else
       {
@@ -205,16 +183,17 @@ public class Percolation
       }
    }
 
-   private void testOutMatrix()
+   private void testOutOpenMatrix()
    {
       System.out.println("Sites opened:" + countOpen);
-      for (int i = 1; i < n*n +1 ; i++ )
+      for (int i = 1; i < n * n + 1; i++)
       {
-         System.out.print("[" + matrix[i-1] + "]");
+         System.out.print("[" + ((openMatrix[i - 1])?"1":" ") + "]");
          if (i % n == 0)
          {
             System.out.println();
          }
       }
    }
+   
 }
